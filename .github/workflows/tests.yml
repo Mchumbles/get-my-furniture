@@ -29,8 +29,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install Node Dependencies
         run: npm i
@@ -42,7 +42,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Copy Environment File
-        run: cp .env.example .env
+        run: cp .env.testing .env
 
       - name: Generate Application Key
         run: php artisan key:generate
