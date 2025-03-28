@@ -28,8 +28,13 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Copy .env file
-        run: cp .env.testing .env
+      - name: Create .env.testing file
+        run: |
+          cp .env.testing.ci .env.testing  # Copy the non-sensitive configuration
+
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.testing
+
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing
 
       - name: Run test suite
         run: |
