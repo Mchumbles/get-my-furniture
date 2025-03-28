@@ -14,4 +14,8 @@ class Furniture extends Model
     protected $fillable = 
         ['name', 'category', 'description', 'price', 'height', 'width', 'depth'
     ];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

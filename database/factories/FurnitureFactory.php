@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Furniture; 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class FurnitureFactory extends Factory
 {
     protected $model = Furniture::class;
+
     public function definition()
     {
         return [
@@ -19,6 +22,9 @@ class FurnitureFactory extends Factory
             'price' => $this->faker->randomFloat(2, 10, 1000),
             'height' => $this->faker->randomFloat(2, 0.5, 2),
             'width' => $this->faker->randomFloat(2, 0.5, 2),
-            'depth' => $this->faker->randomFloat(2, 0.5, 2),        ];
+            'depth' => $this->faker->randomFloat(2, 0.5, 2),
+            'user_id' => User::factory(),
+        ];
     }
 }
+

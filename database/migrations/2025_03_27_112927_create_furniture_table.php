@@ -20,6 +20,9 @@ return new class extends Migration
             $table->decimal('height', 8, 2);
             $table->decimal('width', 8, 2);
             $table->decimal('depth', 8, 2);
+            $table->foreignId('user_id') 
+                  ->constrained()   
+                  ->onDelete('cascade');  
             $table->timestamps();
         });
     }

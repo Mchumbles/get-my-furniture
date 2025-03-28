@@ -3,6 +3,8 @@
 namespace Tests\Feature\Furniture;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use App\Models\User;
 use App\Models\Furniture;
 use Tests\TestCase;
 
@@ -10,62 +12,66 @@ class FurnitureModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+    #[Test]
     public function test_furniture_can_be_created()
     {
-        $furniture = Furniture::create([
-            'name' => 'Wooden Chair',
-            'category'=> 'Seating',
-            'description'=> 'A comfortable wooden chair',
-            'price' => 50.00,
-            'height'=> 1.2, 
-            'width'=> 0.5,
-            'depth'=> 0.5,
+        $user = User::factory()->create(); 
+
+        $furniture = Furniture::factory()->create([
+            'user_id' => $user->id, 
         ]);
 
         $this->assertDatabaseHas('furniture', [
-            'name' => 'Wooden Chair',
-            'price' => 50.00,
+            'name' => $furniture->name,
+            'price' => $furniture->price,
+            'user_id' => $user->id, 
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_furniture_can_be_updated()
     {
-        $furniture = Furniture::create([
-            'name' => 'Wooden Chair',
-            'category'=> 'Seating',
-            'description'=> 'A comfortable wooden chair',
-            'price' => 50.00,
-            'height'=> 1.2, 
-            'width'=> 0.5,
-            'depth'=> 0.5,
+        $user = User::factory()->create();
+
+        $furniture = Furniture::factory()->create([
+            'user_id' => $user->id, 
         ]);
 
         $furniture->update(['price' => 60.00]);
 
         $this->assertDatabaseHas('furniture', [
+            'id' => $furniture->id, 
             'price' => 60.00,
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function test_furniture_can_be_deleted()
     {
-        $furniture = Furniture::create([
-            'name' => 'Wooden Chair',
-            'category'=> 'Seating',
-            'description'=> 'A comfortable wooden chair',
-            'price' => 50.00,
-            'height'=> 1.2, 
-            'width'=> 0.5,
-            'depth'=> 0.5,
+        $user = User::factory()->create(); 
+
+        $furniture = Furniture::factory()->create([
+            'user_id' => $user->id, 
         ]);
 
         $furniture->delete();
 
         $this->assertDatabaseMissing('furniture', [
-            'name' => 'Wooden Chair',
+            'id' => $furniture->id,
         ]);
+    }
+
+    #[Test]
+    public function test_user_has_many_furniture()
+    {
+        $user = User::factory()->create(); 
+
+        $furniture1 = Furniture::factory()->create(['user_id' => $user->id]);
+        $furniture2 = Furniture::factory()->create(['user_id' => $user->id]);
+
+        $user->load('furniture');
+
+        $this->assertCount(2, $user->furniture); 
     }
 }
