@@ -28,10 +28,21 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Install Node.js and dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      - name: Install Node.js dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Vite assets
+        run: npm run build
+
       - name: Create .env.testing file
         run: |
-          cp .env.testing.ci .env.testing 
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing 
+          cp .env.testing.ci .env.testing  # Copy the non-sensitive configuration
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing  # Inject APP_KEY
           echo "DB_PASSWORD=root" >> .env.testing  # Hardcode DB_PASSWORD as root
 
       - name: Wait for MySQL to be ready
