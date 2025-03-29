@@ -15,21 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: Testing
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: get_my_furniture_testing
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup PHP
@@ -39,19 +26,19 @@ jobs:
           tools: composer:v2
           coverage: xdebug
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
 
       - name: Install Node Dependencies
-        run: npm install
+        run: npm i
 
-      - name: Install PHP Dependencies
+      - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy Environment File for Testing
+      - name: Copy Environment File for CI Testing
         run: |
           cp .env.testing.ci .env.testing  
           echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing  
@@ -63,9 +50,6 @@ jobs:
 
       - name: Build Assets
         run: npm run build
-
-      - name: Run Migrations
-        run: php artisan migrate --env=testing
 
       - name: Run Tests
         run: ./vendor/bin/phpunit
