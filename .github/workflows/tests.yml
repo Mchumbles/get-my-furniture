@@ -29,20 +29,21 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
 
       - name: Install Node Dependencies
         run: npm i
 
-      - name: Add Flux Credentials Loaded From ENV
-        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
-
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Copy Environment File
-        run: cp .env.example .env
+      - name: Copy Environment File for CI Testing
+        run: |
+          cp .env.testing.ci .env.testing  
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing  
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.testing  
+          echo "DB_HOST=mysql" >> .env.testing
 
       - name: Generate Application Key
         run: php artisan key:generate
