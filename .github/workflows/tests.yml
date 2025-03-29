@@ -14,7 +14,26 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: get_my_furniture_testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
+      - name: Enable Debugging
+        run: |
+          echo "ACTIONS_RUNNER_DEBUG=true" >> $GITHUB_ENV
+          echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -30,25 +49,24 @@ jobs:
 
       - name: Create .env.testing file
         run: |
-          cp .env.testing.ci .env.testing  # Copy the non-sensitive configuration
+          cp .env.testing.ci .env.testing  
+          echo "APP_KEY='${{ secrets.APP_KEY }}'" >> .env.testing
+          echo "DB_PASSWORD='${{ secrets.DB_PASSWORD }}'" >> .env.testing
 
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.testing
+      - name: Debug .env.testing contents
+        run: cat .env.testing
 
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env.testing
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..10}; do
+            nc -z mysql 3306 && echo "MySQL is up" && exit 0
+            echo "Waiting for MySQL..."
+            sleep 3
+          done
+          echo "MySQL did not start in time" && exit 1
+
+      - name: Run migrations
+        run: php artisan migrate --env=testing
 
       - name: Run test suite
-        run: |
-          php artisan test
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: get_my_furniture_testing
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+        run: php artisan test
